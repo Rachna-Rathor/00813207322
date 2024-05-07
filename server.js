@@ -1,31 +1,27 @@
-const express = require("express");
-const fetch = require("node-fetch"); // Corrected the import
+const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+const cors =require('cors')
 
-const PORT = 9876;
-let numbers = new Set(); // Corrected variable name
-
-app.use((req, res, next) => {
-  req.uniqueNumbers = numbers;
-  next();
+app.use(cors());
+// middle wares
+app.use(bodyParser.json());
+app.use(express.json())
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
 
-app.get("/number/e", async (req, res) => {
-  try {
-    const response = await fetch("http://20.244.56.144/test/primes");
-    const data = await response.json();
-    data.forEach((number) => {
-      // Add each number to the set
-      numbers.add(number);
-    });
-    res.status(200).json({ message: "Numbers fetched successfully" });
-  } catch (error) {
-    // Handle errors
-    console.error("Error fetching numbers:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// connect with database
 
-app.listen(PORT, () => {
-  console.log("App is listening on port 9876");
-});
+const dbConnect=require("./config/database")
+dbConnect();
+
+// router
+const router=require("./routes/item.routes")
+app.use("/item/v1",router)
+
+const userrouter=require("./routes/user.routes")
+app.use("/user/v2",userrouter)
+
+
